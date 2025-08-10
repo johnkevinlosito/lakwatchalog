@@ -25,6 +25,10 @@ model User {
   sessions      Session[]
   accounts      Account[]
 
+  locations Location[]
+  locationLogs LocationLog[]
+  locationLogImages LocationLogImage[]
+
   @@unique([email])
   @@map("user")
 }
@@ -72,4 +76,57 @@ model Verification {
   updatedAt  DateTime?
 
   @@map("verification")
+}
+
+model Location {
+  id            String @id
+  name          String
+  slug          String @unique
+  description   String?
+  lat           Float
+  long          Float
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  userId        String
+  user          User @relation(fields: [userId], references: [id] )
+  
+  locationLogs  LocationLog[]
+
+  @@map("location")
+}
+
+model LocationLog {
+  id          String @id
+  name        String
+  description String?
+  startedAt   DateTime
+  endedAt     DateTime
+  lat         Float
+  long        Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userId      String
+  user        User @relation(fields: [userId], references: [id] )
+
+  locationId  String
+  location    Location @relation(fields: [locationId], references: [id], onDelete: Cascade )
+  locationLogImages      LocationLogImage[]
+
+  @@map("locationLog")
+}
+
+model LocationLogImage {
+  id          String @id
+  fileUrl     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userId      String
+  user        User @relation(fields: [userId], references: [id] )
+  locationlogId  String
+  locationLog    LocationLog @relation(fields: [locationlogId], references: [id], onDelete: Cascade )
+
+  @@map("locationLogImage")
 }
