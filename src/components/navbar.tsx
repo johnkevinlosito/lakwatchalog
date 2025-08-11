@@ -1,8 +1,7 @@
 import Link from "next/link";
 import React from "react";
-import { Button } from "./ui/button";
-import { SiGithub } from "@icons-pack/react-simple-icons";
 import ThemeToggle from "./theme-toggle";
+import GithubSignin from "./github-signin";
 
 const Navbar = () => {
   return (
@@ -17,9 +16,7 @@ const Navbar = () => {
         </div>
         <div className="flex items-center gap-3.5">
           <ThemeToggle />
-          <Button>
-            Sign In with Github <SiGithub />
-          </Button>
+          <GithubSignin />
         </div>
       </div>
     </header>

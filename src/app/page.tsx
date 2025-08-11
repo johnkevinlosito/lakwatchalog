@@ -1,5 +1,4 @@
-import { Button } from "@/components/ui/button";
-import { SiGithub } from "@icons-pack/react-simple-icons";
+import GithubSignin from "@/components/github-signin";
 
 export default function Home() {
   return (
@@ -14,9 +13,7 @@ export default function Home() {
           your journeys.
         </p>
         <div className="flex items-center gap-2">
-          <Button>
-            Sign In with Github <SiGithub />
-          </Button>
+          <GithubSignin />
         </div>
       </div>
     </div>
