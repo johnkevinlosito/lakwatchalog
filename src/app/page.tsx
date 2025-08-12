@@ -1,6 +1,14 @@
 import GithubSignin from "@/components/github-signin";
+import { Button } from "@/components/ui/button";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import Link from "next/link";
 
-export default function Home() {
+export default async function Home() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
   return (
     <div className="flex flex-col gap-16 px-8 py-24 text-center">
       <div className="flex flex-col items-center justify-center gap-8  max-w-2xl mx-auto">
@@ -13,7 +21,13 @@ export default function Home() {
           your journeys.
         </p>
         <div className="flex items-center gap-2">
-          <GithubSignin />
+          {!session?.user ? (
+            <GithubSignin />
+          ) : (
+            <Button asChild>
+              <Link href={"/dashboard"}>Go to Dashboard</Link>
+            </Button>
+          )}
         </div>
       </div>
     </div>
