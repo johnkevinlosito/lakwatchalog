@@ -10,7 +10,7 @@ export default async function Home() {
   });
 
   return (
-    <div className="flex flex-col gap-16 px-8 py-24 text-center">
+    <main className="flex flex-col gap-16 px-8 py-24 text-center mx-auto">
       <div className="flex flex-col items-center justify-center gap-8  max-w-2xl mx-auto">
         <h1 className="mb-0 text-balance font-medium text-6xl md:text-7xl xl:text-[5.25rem]">
           LakwatchaLog
@@ -30,6 +30,6 @@ export default async function Home() {
           )}
         </div>
       </div>
-    </div>
+    </main>
   );
 }

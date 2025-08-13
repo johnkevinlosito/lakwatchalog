@@ -3,6 +3,7 @@ import { Noto_Sans_JP, Noto_Sans_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/navbar";
 import { ThemeProvider } from "@/components/theme-provider";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 const notoSansJp = Noto_Sans_JP({
   variable: "--font-noto-sans-jp",
@@ -26,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${notoSansJp.variable} ${notoSansMono.variable} antialiased`}
+        className={`${notoSansJp.variable} ${notoSansMono.variable} antialiased overscroll-none [--header-height:calc(--spacing(16))]`}
       >
         <ThemeProvider
           attribute="class"
@@ -34,10 +35,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className="flex min-h-screen flex-col">
+          <SidebarProvider className="flex flex-col">
             <Navbar />
-            <main>{children}</main>
-          </div>
+            <div className="flex flex-1">{children}</div>
+          </SidebarProvider>
         </ThemeProvider>
       </body>
     </html>
