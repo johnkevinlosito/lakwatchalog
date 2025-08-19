@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/navbar";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { Toaster } from "@/components/ui/sonner";
 
 const notoSansJp = Noto_Sans_JP({
   variable: "--font-noto-sans-jp",
@@ -38,6 +39,7 @@ export default function RootLayout({
           <SidebarProvider className="flex flex-col">
             <Navbar />
             <div className="flex flex-1">{children}</div>
+            <Toaster position="top-right" richColors />
           </SidebarProvider>
         </ThemeProvider>
       </body>

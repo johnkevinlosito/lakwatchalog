@@ -24,7 +24,7 @@ const data = {
     },
     {
       title: "Add Location",
-      url: "/dashboard/add",
+      url: "/dashboard/locations/add",
       icon: CirclePlus,
     },
   ],

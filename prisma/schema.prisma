@@ -79,7 +79,7 @@ model Verification {
 }
 
 model Location {
-  id            String @id
+  id            String @id @default(cuid())
   name          String
   slug          String @unique
   description   String?
@@ -97,7 +97,7 @@ model Location {
 }
 
 model LocationLog {
-  id          String @id
+  id          String @id @default(cuid())
   name        String
   description String?
   startedAt   DateTime
@@ -118,7 +118,7 @@ model LocationLog {
 }
 
 model LocationLogImage {
-  id          String @id
+  id          String @id @default(cuid())
   fileUrl     String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
