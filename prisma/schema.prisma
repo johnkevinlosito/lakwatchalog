@@ -94,6 +94,7 @@ model Location {
   locationLogs  LocationLog[]
 
   @@map("location")
+  @@unique([name, userId])
 }
 
 model LocationLog {

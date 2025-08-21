@@ -6,6 +6,8 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import prisma from "../prisma";
+import slugify from "slug";
+import { customAlphabet } from "nanoid";
 
 const locationSchema = z.object({
   name: z.string().min(1).max(100),
@@ -26,6 +28,7 @@ export async function submitLocationAction(
     redirect("/");
   }
 
+  const nanoid = customAlphabet("1234567890abcdefghijklmnopqrstuvwxyz", 5);
   try {
     const rawData: LocationFormData = {
       name: formData.get("name") as string,
@@ -45,10 +48,53 @@ export async function submitLocationAction(
       };
     }
 
+    const existingLocation = await prisma.location.findFirst({
+      where: {
+        AND: {
+          name: {
+            equals: rawData.name,
+            mode: "insensitive",
+          },
+          userId: { equals: session.user.id },
+        },
+      },
+    });
+
+    if (existingLocation) {
+      return {
+        success: false,
+        message: "A location with that name already exists!",
+        inputs: rawData,
+      };
+    }
+
+    let slug = slugify(validatedData.data.name);
+    let existingSlug = !!(await prisma.location.findFirst({
+      where: {
+        slug: {
+          equals: slug,
+        },
+      },
+    }));
+    while (existingSlug) {
+      const id = nanoid();
+      const idSlug = `${slug}-${id}`;
+      existingSlug = !!(await prisma.location.findFirst({
+        where: {
+          slug: {
+            equals: idSlug,
+          },
+        },
+      }));
+      if (!existingSlug) {
+        slug = idSlug;
+      }
+    }
+
     await prisma.location.create({
       data: {
         ...validatedData.data,
-        slug: validatedData.data.name.replaceAll(" ", "-").toLowerCase(),
+        slug,
         userId: session.user.id,
       },
     });
