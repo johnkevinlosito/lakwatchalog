@@ -69,23 +69,11 @@ export async function submitLocationAction(
     }
 
     let slug = slugify(validatedData.data.name);
-    let existingSlug = !!(await prisma.location.findFirst({
-      where: {
-        slug: {
-          equals: slug,
-        },
-      },
-    }));
+    let existingSlug = !!(await findLocationBySlug(slug));
     while (existingSlug) {
       const id = nanoid();
       const idSlug = `${slug}-${id}`;
-      existingSlug = !!(await prisma.location.findFirst({
-        where: {
-          slug: {
-            equals: idSlug,
-          },
-        },
-      }));
+      existingSlug = !!(await findLocationBySlug(idSlug));
       if (!existingSlug) {
         slug = idSlug;
       }
@@ -110,4 +98,14 @@ export async function submitLocationAction(
       message: "An unexpected error occurred",
     };
   }
+}
+
+async function findLocationBySlug(slug: string) {
+  return await prisma.location.findFirst({
+    where: {
+      slug: {
+        equals: slug,
+      },
+    },
+  });
 }
