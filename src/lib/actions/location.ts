@@ -8,6 +8,7 @@ import { redirect } from "next/navigation";
 import prisma from "../prisma";
 import slugify from "slug";
 import { customAlphabet } from "nanoid";
+import { revalidatePath } from "next/cache";
 
 const locationSchema = z.object({
   name: z.string().min(1).max(100),
@@ -86,7 +87,7 @@ export async function submitLocationAction(
         userId: session.user.id,
       },
     });
-
+    revalidatePath("/");
     return {
       success: true,
       message: "Location saved successfully!",
@@ -98,6 +99,22 @@ export async function submitLocationAction(
       message: "An unexpected error occurred",
     };
   }
+}
+
+export async function getLocations() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    redirect("/");
+  }
+  const location = await prisma.location.findMany({
+    where: {
+      userId: session.user.id,
+    },
+  });
+  return location;
 }
 
 async function findLocationBySlug(slug: string) {
