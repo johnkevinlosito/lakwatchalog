@@ -1,7 +1,12 @@
 "use client";
 
-import React, { useCallback, useRef } from "react";
-import MapLibre, { Marker } from "react-map-gl/maplibre";
+import React, { useCallback, useRef, useState } from "react";
+import MapLibre, {
+  FullscreenControl,
+  Marker,
+  NavigationControl,
+  Popup,
+} from "react-map-gl/maplibre";
 
 import type { MapRef } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -18,6 +23,7 @@ import {
 const Map = ({ locations }: { locations: Location[] }) => {
   const { latitude, longitude } = CENTER_PH;
   const mapRef = useRef<MapRef>(null);
+  const [popupInfo, setPopupInfo] = useState<Location | null>(null);
 
   const onMapLoad = useCallback(() => {
     if (locations.length > 0) {
@@ -43,12 +49,20 @@ const Map = ({ locations }: { locations: Location[] }) => {
         onLoad={onMapLoad}
         mapStyle="https://tiles.openfreemap.org/styles/liberty"
       >
+        <FullscreenControl position="top-right" />
+        <NavigationControl position="top-right" />
         {locations.length > 0 ? (
           locations.map((location) => (
             <Marker
               key={location.id}
               longitude={location.long}
               latitude={location.lat}
+              onClick={(e) => {
+                // If we let the click event propagates to the map, it will immediately close the popup
+                // with `closeOnClick: true`
+                e.originalEvent.stopPropagation();
+                setPopupInfo(location);
+              }}
             >
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -62,6 +76,19 @@ const Map = ({ locations }: { locations: Location[] }) => {
           ))
         ) : (
           <Marker longitude={longitude} latitude={latitude} anchor="bottom" />
+        )}
+
+        {popupInfo && (
+          <Popup
+            longitude={Number(popupInfo.long)}
+            latitude={Number(popupInfo.lat)}
+            onClose={() => setPopupInfo(null)}
+          >
+            <div className=" flex flex-col">
+              <h3 className="text-xl">{popupInfo.name}</h3>
+              <p>{popupInfo.description}</p>
+            </div>
+          </Popup>
         )}
       </MapLibre>
     </div>
