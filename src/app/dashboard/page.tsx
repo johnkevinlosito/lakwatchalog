@@ -20,14 +20,14 @@ const DashboardPage = async () => {
   const locations = await getLocations();
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 flex-1">
       <div>
         <h2 className="text-2xl font-bold">Locations</h2>
 
         {locations.length > 0 ? (
-          <div className="flex flex-wrap gap-4 mt-4">
+          <div className="flex flex-nowrap gap-4 mt-4 overflow-x-auto pb-2">
             {locations.map((location) => (
-              <Card key={location.id} className="w-full max-w-xs">
+              <Card key={location.id} className="w-full max-w-xs shrink-0">
                 <CardHeader>
                   <CardTitle>{location.name}</CardTitle>
                 </CardHeader>
@@ -49,7 +49,7 @@ const DashboardPage = async () => {
           </div>
         )}
       </div>
-      <Map />
+      <Map locations={locations} />
     </div>
   );
 };
