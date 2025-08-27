@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import MapLibre, {
   FullscreenControl,
   Marker,
@@ -12,30 +12,54 @@ import type { MapRef } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import maplibregl from "maplibre-gl";
 import { CENTER_PH } from "@/lib/constants";
-import { Location } from "@/generated/prisma";
 import { MapPin } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useMapLocationStore } from "@/providers/map-location-store-provider";
+import { MapPoint } from "@/types/map";
+import { cn } from "@/lib/utils";
 
-const Map = ({ locations }: { locations: Location[] }) => {
+const Map = () => {
+  const { mapPoints, selectedPoint, setSelectedPoint, shouldFly } =
+    useMapLocationStore((state) => state);
+
   const { latitude, longitude } = CENTER_PH;
   const mapRef = useRef<MapRef>(null);
-  const [popupInfo, setPopupInfo] = useState<Location | null>(null);
+  const [popupInfo, setPopupInfo] = useState<MapPoint | null>(null);
 
   const onMapLoad = useCallback(() => {
-    if (locations.length > 0) {
+    if (mapPoints.length > 0) {
       const map = mapRef.current!.getMap();
-      const bounds = new maplibregl.LngLatBounds();
-      locations.forEach((location) => {
-        bounds.extend([location.long, location.lat]);
-      });
-
-      map.fitBounds(bounds, { padding: 50 });
+      fitBounds(mapPoints, map);
     }
-  }, [locations]);
+  }, [mapPoints]);
+
+  useEffect(() => {
+    if (mapPoints.length > 0 && mapRef.current) {
+      const map = mapRef.current.getMap();
+      fitBounds(mapPoints, map);
+    }
+  }, [mapPoints]);
+
+  useEffect(() => {
+    if (mapRef.current) {
+      if (selectedPoint) {
+        if (shouldFly) {
+          const map = mapRef.current.getMap();
+          map.flyTo({
+            center: [selectedPoint.long, selectedPoint.lat],
+            speed: 0.8,
+          });
+        }
+      } else if (mapPoints.length > 0) {
+        const map = mapRef.current.getMap();
+        fitBounds(mapPoints, map);
+      }
+    }
+  }, [mapPoints, selectedPoint, shouldFly]);
   return (
     <div className="flex-1">
       <MapLibre
@@ -51,25 +75,34 @@ const Map = ({ locations }: { locations: Location[] }) => {
       >
         <FullscreenControl position="top-right" />
         <NavigationControl position="top-right" />
-        {locations.length > 0 ? (
-          locations.map((location) => (
+        {mapPoints.length > 0 ? (
+          mapPoints.map((point) => (
             <Marker
-              key={location.id}
-              longitude={location.long}
-              latitude={location.lat}
+              key={point.id}
+              longitude={point.long}
+              latitude={point.lat}
               onClick={(e) => {
                 // If we let the click event propagates to the map, it will immediately close the popup
                 // with `closeOnClick: true`
                 e.originalEvent.stopPropagation();
-                setPopupInfo(location);
+                setPopupInfo(point);
               }}
             >
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <MapPin className="fill-red-500 size-10 text-white" />
+                  <MapPin
+                    className={cn(
+                      " size-10 text-white",
+                      selectedPoint?.id === point.id
+                        ? "fill-cyan-600"
+                        : "fill-red-500"
+                    )}
+                    onMouseEnter={() => setSelectedPoint(point, false)}
+                    onMouseLeave={() => setSelectedPoint(null, false)}
+                  />
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{location.name}</p>
+                  <p>{point.name}</p>
                 </TooltipContent>
               </Tooltip>
             </Marker>
@@ -96,3 +129,12 @@ const Map = ({ locations }: { locations: Location[] }) => {
 };
 
 export default Map;
+
+function fitBounds(mapPoints: MapPoint[], map: maplibregl.Map) {
+  const bounds = new maplibregl.LngLatBounds();
+  mapPoints.forEach((location) => {
+    bounds.extend([location.long, location.lat]);
+  });
+
+  map.fitBounds(bounds, { padding: 50 });
+}

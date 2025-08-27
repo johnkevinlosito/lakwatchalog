@@ -1,6 +1,6 @@
+import LocationCard from "@/components/location-card";
 import Map from "@/components/map";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getLocations } from "@/lib/actions/location";
 import { auth } from "@/lib/auth";
 import { CirclePlus } from "lucide-react";
@@ -27,14 +27,7 @@ const DashboardPage = async () => {
         {locations.length > 0 ? (
           <div className="flex flex-nowrap gap-4 mt-4 overflow-x-auto pb-2">
             {locations.map((location) => (
-              <Card key={location.id} className="w-full max-w-xs shrink-0">
-                <CardHeader>
-                  <CardTitle>{location.name}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p>{location.description}</p>
-                </CardContent>
-              </Card>
+              <LocationCard key={location.id} location={location} />
             ))}
           </div>
         ) : (
@@ -49,7 +42,7 @@ const DashboardPage = async () => {
           </div>
         )}
       </div>
-      <Map locations={locations} />
+      <Map />
     </div>
   );
 };
