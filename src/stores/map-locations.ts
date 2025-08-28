@@ -1,5 +1,6 @@
 import { env } from "@/env/client";
 import { Location } from "@/generated/prisma";
+import { CENTER_PH } from "@/lib/constants";
 import { MapPoint } from "@/types/map";
 import { createStore } from "zustand/vanilla";
 
@@ -7,14 +8,15 @@ export type MapLocationState = {
   locations: Location[];
   mapPoints: MapPoint[];
   selectedPoint: MapPoint | null;
-  shouldFly: boolean;
+  addedPoint: MapPoint | null;
   loading: boolean;
 };
 
 export type MapLocationActions = {
   refresh: () => Promise<void>;
   setMapPoints: (points: MapPoint[]) => void;
-  setSelectedPoint: (point: MapPoint | null, shouldFly: boolean) => void;
+  setSelectedPoint: (point: MapPoint | null) => void;
+  setAddedPoint: (point: MapPoint | null) => void;
 };
 
 export type MapLocationStore = MapLocationState & MapLocationActions;
@@ -23,10 +25,16 @@ export const defaultInitState: MapLocationState = {
   locations: [],
   mapPoints: [],
   selectedPoint: null,
-  shouldFly: false,
+  addedPoint: null,
   loading: false,
 };
-
+export const defaultAddedPoint: MapPoint = {
+  id: "add-point",
+  name: "Added Point",
+  description: "",
+  long: CENTER_PH.longitude,
+  lat: CENTER_PH.latitude,
+};
 export const initMapLocationStore = async (): Promise<MapLocationState> => {
   if (typeof window === "undefined") {
     return defaultInitState;
@@ -43,6 +51,10 @@ export const initMapLocationStore = async (): Promise<MapLocationState> => {
     }));
     return {
       ...defaultInitState,
+      addedPoint:
+        window.location.pathname === "/dashboard/locations/add"
+          ? defaultAddedPoint
+          : null,
       locations,
       mapPoints,
     };
@@ -67,8 +79,8 @@ export const createMapLocationStore = (
       });
     },
     setMapPoints: (points) => set(() => ({ mapPoints: points })),
-    setSelectedPoint: (point, shouldFly = false) =>
-      set(() => ({ selectedPoint: point, shouldFly })),
+    setSelectedPoint: (point) => set(() => ({ selectedPoint: point })),
+    setAddedPoint: (point) => set(() => ({ addedPoint: point })),
   }));
   initState.then(store.setState);
   return store;

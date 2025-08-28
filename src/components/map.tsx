@@ -7,7 +7,6 @@ import MapLibre, {
   NavigationControl,
   Popup,
 } from "react-map-gl/maplibre";
-
 import type { MapRef } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import maplibregl from "maplibre-gl";
@@ -23,43 +22,40 @@ import { MapPoint } from "@/types/map";
 import { cn } from "@/lib/utils";
 
 const Map = () => {
-  const { mapPoints, selectedPoint, setSelectedPoint, shouldFly } =
-    useMapLocationStore((state) => state);
+  const {
+    mapPoints,
+    selectedPoint,
+    setSelectedPoint,
+    addedPoint,
+    setAddedPoint,
+  } = useMapLocationStore((state) => state);
 
   const { latitude, longitude } = CENTER_PH;
   const mapRef = useRef<MapRef>(null);
   const [popupInfo, setPopupInfo] = useState<MapPoint | null>(null);
 
   const onMapLoad = useCallback(() => {
-    if (mapPoints.length > 0) {
+    if (addedPoint) {
+      const map = mapRef.current!.getMap();
+      map.flyTo({
+        center: [addedPoint.long, addedPoint.lat],
+        speed: 0.8,
+        zoom: 3,
+      });
+    } else if (mapPoints.length > 0) {
       const map = mapRef.current!.getMap();
       fitBounds(mapPoints, map);
     }
-  }, [mapPoints]);
-
-  useEffect(() => {
-    if (mapPoints.length > 0 && mapRef.current) {
-      const map = mapRef.current.getMap();
-      fitBounds(mapPoints, map);
-    }
-  }, [mapPoints]);
+  }, [mapPoints, addedPoint]);
 
   useEffect(() => {
     if (mapRef.current) {
-      if (selectedPoint) {
-        if (shouldFly) {
-          const map = mapRef.current.getMap();
-          map.flyTo({
-            center: [selectedPoint.long, selectedPoint.lat],
-            speed: 0.8,
-          });
-        }
-      } else if (mapPoints.length > 0) {
+      if (mapPoints.length > 0) {
         const map = mapRef.current.getMap();
         fitBounds(mapPoints, map);
       }
     }
-  }, [mapPoints, selectedPoint, shouldFly]);
+  }, [mapPoints]);
   return (
     <div className="flex-1">
       <MapLibre
@@ -71,11 +67,21 @@ const Map = () => {
         }}
         style={{ width: "100%", height: "100%", borderRadius: 14 }}
         onLoad={onMapLoad}
+        doubleClickZoom={!addedPoint}
+        onDblClick={(e) => {
+          if (addedPoint) {
+            setAddedPoint({
+              ...addedPoint,
+              lat: e.lngLat.lat,
+              long: e.lngLat.lng,
+            });
+          }
+        }}
         mapStyle="https://tiles.openfreemap.org/styles/liberty"
       >
         <FullscreenControl position="top-right" />
         <NavigationControl position="top-right" />
-        {mapPoints.length > 0 ? (
+        {mapPoints.length > 0 &&
           mapPoints.map((point) => (
             <Marker
               key={point.id}
@@ -88,27 +94,49 @@ const Map = () => {
                 setPopupInfo(point);
               }}
             >
-              <Tooltip>
+              <Tooltip open={selectedPoint?.id === point.id}>
                 <TooltipTrigger asChild>
                   <MapPin
                     className={cn(
-                      " size-10 text-white",
+                      "size-10 text-white",
                       selectedPoint?.id === point.id
                         ? "fill-cyan-600"
                         : "fill-red-500"
                     )}
-                    onMouseEnter={() => setSelectedPoint(point, false)}
-                    onMouseLeave={() => setSelectedPoint(null, false)}
+                    onMouseEnter={() => setSelectedPoint(point)}
+                    onMouseLeave={() => setSelectedPoint(null)}
                   />
                 </TooltipTrigger>
-                <TooltipContent>
+                <TooltipContent className="bg-slate-800 text-slate-100 [&_svg]:fill-slate-800 [&_svg]:bg-slate-800">
                   <p>{point.name}</p>
                 </TooltipContent>
               </Tooltip>
             </Marker>
-          ))
-        ) : (
-          <Marker longitude={longitude} latitude={latitude} anchor="bottom" />
+          ))}
+        {addedPoint && (
+          <Marker
+            longitude={addedPoint.long}
+            latitude={addedPoint.lat}
+            draggable
+            onDragEnd={(e) =>
+              setAddedPoint({
+                ...addedPoint,
+                lat: e.lngLat.lat,
+                long: e.lngLat.lng,
+              })
+            }
+          >
+            <Tooltip open={true}>
+              <TooltipTrigger asChild>
+                <MapPin
+                  className={"size-11 fill-amber-500 hover:cursor-pointer"}
+                />
+              </TooltipTrigger>
+              <TooltipContent className="bg-slate-800 text-slate-100 [&_svg]:fill-slate-800 [&_svg]:bg-slate-800">
+                <p>Drag to your desired location</p>
+              </TooltipContent>
+            </Tooltip>
+          </Marker>
         )}
 
         {popupInfo && (

@@ -26,8 +26,8 @@ const LocationCard = ({ location }: { location: Location }) => {
         "w-full max-w-xs shrink-0",
         selectedPoint?.id === mapPoint.id ? "border-cyan-600" : ""
       )}
-      onMouseEnter={() => setSelectedPoint(mapPoint, true)}
-      onMouseLeave={() => setSelectedPoint(null, false)}
+      onMouseEnter={() => setSelectedPoint(mapPoint)}
+      onMouseLeave={() => setSelectedPoint(null)}
     >
       <CardHeader>
         <CardTitle>{location.name}</CardTitle>

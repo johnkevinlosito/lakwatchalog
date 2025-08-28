@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useActionState, useEffect } from "react";
+import React, { useActionState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,6 +17,8 @@ import { ActionResponse } from "@/types/location";
 import { submitLocationAction } from "@/lib/actions/location";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useMapLocationStore } from "@/providers/map-location-store-provider";
+import { MapPin } from "lucide-react";
 
 const initialState: ActionResponse = {
   success: false,
@@ -28,21 +30,37 @@ const LocationForm = () => {
     submitLocationAction,
     initialState
   );
+  const { addedPoint, refresh } = useMapLocationStore((state) => state);
+  const latRef = useRef<HTMLInputElement>(null);
+  const longRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+  function formatNumber(value?: number) {
+    if (!value) return 0;
+    return value.toFixed(5);
+  }
+  useEffect(() => {
+    if (addedPoint) {
+      if (latRef.current) latRef.current.value = String(addedPoint.lat ?? "");
+      if (longRef.current)
+        longRef.current.value = String(addedPoint.long ?? "");
+    }
+  }, [addedPoint]);
+
   useEffect(() => {
     if (state.message) {
       if (state.success) {
         toast.success(state.message);
         router.push("/dashboard");
+        refresh();
       } else {
         toast.error(state.message);
       }
     }
-  }, [state, router]);
+  }, [state, router, refresh]);
 
   return (
     <form action={action}>
-      <Card className="w-full max-w-md">
+      <Card className="w-md">
         <CardHeader>
           <CardTitle>Add Location</CardTitle>
           <CardDescription>
@@ -85,38 +103,42 @@ const LocationForm = () => {
                 </p>
               )}
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="lat">Latitude</Label>
-              <Input
-                id="lat"
-                name="lat"
-                type="text"
-                defaultValue={state.inputs?.lat}
-                className={state?.errors?.lat ? "border-destructive" : ""}
-                required
-              />
-              {state?.errors?.lat && (
-                <p id="lat-error" className="text-sm text-destructive">
-                  {state.errors.lat[0]}
-                </p>
-              )}
+            <div>
+              <p>
+                Drag the{" "}
+                <MapPin
+                  className={
+                    "fill-amber-500 text-card inline hover:cursor-pointer"
+                  }
+                />
+                marker to your desired location.
+              </p>
+              <p>Or double click on the map.</p>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="long">Longitude</Label>
-              <Input
-                id="long"
-                name="long"
-                type="text"
-                defaultValue={state.inputs?.long}
-                className={state?.errors?.long ? "border-destructive" : ""}
-                required
-              />
-              {state?.errors?.long && (
-                <p id="long-error" className="text-sm text-destructive">
-                  {state.errors.long[0]}
-                </p>
-              )}
-            </div>
+            <p className="text-sm text-muted-foreground">
+              Current location:{" "}
+              {`${formatNumber(addedPoint?.lat)}, ${formatNumber(
+                addedPoint?.long
+              )}`}
+            </p>
+            <Input
+              id="lat"
+              name="lat"
+              type="hidden"
+              defaultValue={state.inputs?.lat}
+              className={state?.errors?.lat ? "border-destructive" : ""}
+              required
+              ref={latRef}
+            />
+            <Input
+              id="long"
+              name="long"
+              type="hidden"
+              defaultValue={state.inputs?.long}
+              className={state?.errors?.long ? "border-destructive" : ""}
+              required
+              ref={longRef}
+            />
           </div>
         </CardContent>
         <CardFooter className="flex-col gap-2">
