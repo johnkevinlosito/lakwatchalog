@@ -56,8 +56,18 @@ const Map = () => {
       }
     }
   }, [mapPoints]);
+  useEffect(() => {
+    if (addedPoint && mapRef.current) {
+      const map = mapRef.current.getMap();
+      map.flyTo({
+        center: [addedPoint.long, addedPoint.lat],
+        speed: 0.8,
+        zoom: 3,
+      });
+    }
+  }, [addedPoint]);
   return (
-    <div className="flex-1">
+    <div className="flex-1 min-h-[50dvh] lg:min-h-0">
       <MapLibre
         ref={mapRef}
         initialViewState={{
