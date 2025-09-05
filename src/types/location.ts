@@ -1,4 +1,4 @@
-import { Location } from "@/generated/prisma";
+import { Location, Prisma } from "@/generated/prisma";
 
 export type LocationFormData = Pick<
   Location,
@@ -13,3 +13,9 @@ export interface ActionResponse {
     [K in keyof LocationFormData]?: string[];
   };
 }
+
+export type LocationWithLogs = Prisma.LocationGetPayload<{
+  include: {
+    locationLogs: true;
+  };
+}>;

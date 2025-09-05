@@ -145,4 +145,8 @@
   .maplibregl-popup-close-button {
     @apply px-2;
   }
+
+  .h-main-body {
+    @apply h-[calc(100svh-var(--header-height)-calc(var(--spacing)*8))];
+  }
 }

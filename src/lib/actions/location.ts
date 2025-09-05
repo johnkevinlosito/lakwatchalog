@@ -126,3 +126,16 @@ async function findLocationBySlug(slug: string) {
     },
   });
 }
+
+export async function getLocationBySlug(slug: string) {
+  return await prisma.location.findFirst({
+    where: {
+      slug: {
+        equals: slug,
+      },
+    },
+    include: {
+      locationLogs: true,
+    },
+  });
+}

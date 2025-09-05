@@ -1,4 +1,4 @@
-import LocationCard from "@/components/location-card";
+import LocationCard from "@/components/location/location-card";
 import Map from "@/components/map";
 import { Button } from "@/components/ui/button";
 import { getLocations } from "@/lib/actions/location";

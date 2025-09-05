@@ -14,6 +14,7 @@ import {
 import SidebarItems from "./sidebar-items";
 import { signOut } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import SidebarLocationItems from "./sidebar-location-items";
 
 const data = {
   navMain: [
@@ -49,6 +50,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     >
       <SidebarContent>
         <SidebarItems items={data.navMain} />
+        <SidebarLocationItems />
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>

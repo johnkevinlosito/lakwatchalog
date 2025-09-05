@@ -5,6 +5,7 @@ import { Location } from "@/generated/prisma";
 import { cn } from "@/lib/utils";
 import { useMapLocationStore } from "@/providers/map-location-store-provider";
 import { MapPoint } from "@/types/map";
+import Link from "next/link";
 
 import React from "react";
 
@@ -21,21 +22,26 @@ const LocationCard = ({ location }: { location: Location }) => {
   );
 
   return (
-    <Card
-      className={cn(
-        "w-full max-w-xs shrink-0",
-        selectedPoint?.id === mapPoint.id ? "border-cyan-600" : ""
-      )}
-      onMouseEnter={() => setSelectedPoint(mapPoint)}
-      onMouseLeave={() => setSelectedPoint(null)}
+    <Link
+      href={`/dashboard/locations/${location.slug}`}
+      className="w-full max-w-xs shrink-0"
     >
-      <CardHeader>
-        <CardTitle>{location.name}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p>{location.description}</p>
-      </CardContent>
-    </Card>
+      <Card
+        className={cn(
+          "w-full max-w-xs shrink-0",
+          selectedPoint?.id === mapPoint.id ? "border-cyan-600" : ""
+        )}
+        onMouseEnter={() => setSelectedPoint(mapPoint)}
+        onMouseLeave={() => setSelectedPoint(null)}
+      >
+        <CardHeader>
+          <CardTitle>{location.name}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>{location.description}</p>
+        </CardContent>
+      </Card>
+    </Link>
   );
 };
 

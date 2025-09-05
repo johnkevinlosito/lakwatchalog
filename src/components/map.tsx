@@ -174,5 +174,5 @@ function fitBounds(mapPoints: MapPoint[], map: maplibregl.Map) {
     bounds.extend([location.long, location.lat]);
   });
 
-  map.fitBounds(bounds, { padding: 50 });
+  map.fitBounds(bounds, { padding: 50, maxZoom: 10 });
 }
