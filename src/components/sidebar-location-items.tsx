@@ -12,12 +12,13 @@ import {
 import Link from "next/link";
 import { useMapLocationStore } from "@/providers/map-location-store-provider";
 import { Separator } from "./ui/separator";
+import { usePathname } from "next/navigation";
 
 const SidebarLocationItems = () => {
   const { locations, loading, setSelectedPoint } = useMapLocationStore(
     (state) => state
   );
-
+  const pathname = usePathname();
   if (loading) {
     return (
       <SidebarGroup>
@@ -51,6 +52,7 @@ const SidebarLocationItems = () => {
                   })
                 }
                 onMouseLeave={() => setSelectedPoint(null)}
+                isActive={`/dashboard/locations/${location.slug}` === pathname}
                 asChild
               >
                 <Link href={`/dashboard/locations/${location.slug}`}>
